@@ -1,6 +1,8 @@
-# GitHub Copilot Coding Agent セットアップステップ（ワークフロー版）
-# .github/copilot-setup-steps.yml と対応するワークフローです。
-# このワークフローを実行することで、セットアップ内容を事前に検証できます。
+# GitHub Copilot Coding Agent セットアップステップ
+#
+# Copilot coding agent がビルド環境で実行する初期化ステップを定義します。
+# ジョブ名は `copilot-setup-steps` である必要があります。
+# 手動実行（workflow_dispatch）または本ファイルの変更時に実行して、セットアップ内容を事前に検証できます。
 
 name: Copilot Setup Steps
 
@@ -13,63 +15,30 @@ on:
     paths:
       - .github/workflows/copilot-setup-steps.yml
 
+permissions:
+  contents: read
+
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
+      - name: Node.js のセットアップ
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      # 生成画像やスクリーンショットで日本語が文字化けしないよう、CJK フォントのみ導入する
       - name: 日本語フォントのインストール
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            fonts-noto-cjk \
-            fonts-noto-cjk-extra \
-            fonts-ipafont \
-            fonts-ipaexfont \
-            fonts-takao-gothic \
-            fonts-takao-mincho \
-            fonts-liberation \
-            fonts-dejavu \
-            fonts-ubuntu \
-            fonts-open-sans
-          echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | sudo debconf-set-selections
-          sudo apt-get install -y ttf-mscorefonts-installer
-          sudo mkdir -p /usr/share/fonts/truetype/segoe-ui
-          cd /tmp
-          wget -q https://github.com/mrbvrz/segoe-ui-linux/raw/master/font/segoeui.ttf -O segoeui.ttf
-          wget -q https://github.com/mrbvrz/segoe-ui-linux/raw/master/font/segoeuib.ttf -O segoeuib.ttf
-          wget -q https://github.com/mrbvrz/segoe-ui-linux/raw/master/font/segoeuii.ttf -O segoeuii.ttf
-          wget -q https://github.com/mrbvrz/segoe-ui-linux/raw/master/font/segoeuiz.ttf -O segoeuiz.ttf
-          sudo mv *.ttf /usr/share/fonts/truetype/segoe-ui/
-          fc-cache -fv
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-color-emoji
+          fc-cache -f
 
-      # TODO: 実プロジェクトに合わせて以下を有効化してください
-      # - name: Node.js のセットアップ
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '22'
-      #     cache: 'npm'
-      #
-      # - name: 依存関係のインストール
-      #   run: npm ci
-      #
-      # - name: 型チェック
-      #   run: npm run type-check
-      #
-      # - name: ビルド
-      #   run: npm run build-only
-      #
-      # - name: 開発サーバーの起動
-      #   run: npm run dev &
-      #
-      # - name: サーバーの起動待機
-      #   run: |
-      #     timeout 60 bash -c \
-      #       'until curl -sf http://localhost:5173 > /dev/null; \
-      #       do sleep 2; done' || exit 1
-      #     echo "Development server is ready"
+      - name: サイトの検証
+        run: node scripts/check-site.mjs site
