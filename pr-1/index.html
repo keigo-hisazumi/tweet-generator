@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ツイート画像ジェネレーター</title>
+  <meta name="description" content="アイコン・ユーザー名・ユーザーID・本文を入力して、ツイート風の画像を生成し PNG でダウンロードできるツールです。">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">ツイート画像ジェネレーター</h1>
+  </header>
+
+  <main class="container">
+    <!-- ツイート文入力画面 -->
+    <section id="input-screen" class="screen" aria-labelledby="input-heading">
+      <h2 id="input-heading" class="screen-title">ツイート内容を入力</h2>
+
+      <form id="tweet-form" class="card" novalidate>
+        <div class="field">
+          <span class="label">アイコン画像</span>
+          <div class="avatar-field">
+            <img id="avatar-preview" class="avatar-preview" alt="アイコン画像のプレビュー" hidden>
+            <div id="avatar-placeholder" class="avatar-placeholder" aria-hidden="true"></div>
+            <div class="avatar-actions">
+              <input id="avatar-input" class="visually-hidden" type="file" accept="image/*">
+              <label class="button button-secondary" for="avatar-input">画像を選択</label>
+              <button id="avatar-clear" class="button button-text" type="button" hidden>削除</button>
+              <p class="hint">未選択の場合はデフォルトのアイコンを使用します</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="name-input">ユーザー名 <span class="required">必須</span></label>
+          <input id="name-input" name="name" type="text" maxlength="50" autocomplete="off" required placeholder="例: 北区太郎">
+          <p class="error" id="name-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="id-input">ユーザーID <span class="required">必須</span></label>
+          <div class="input-prefix">
+            <span aria-hidden="true">@</span>
+            <input id="id-input" name="userId" type="text" maxlength="16" autocomplete="off" autocapitalize="off" spellcheck="false" required placeholder="kitaku_taro">
+          </div>
+          <p class="hint">半角英数字とアンダースコア（_）で 15 文字以内</p>
+          <p class="error" id="id-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label class="label" for="body-input">本文 <span class="required">必須</span></label>
+          <textarea id="body-input" name="body" rows="5" maxlength="280" required placeholder="いまどうしてる？"></textarea>
+          <p class="counter"><span id="body-count">0</span> / 280</p>
+          <p class="error" id="body-error" hidden></p>
+        </div>
+
+        <fieldset class="field">
+          <legend class="label">テーマ</legend>
+          <div class="radio-group">
+            <label><input type="radio" name="theme" value="light" checked> ライト</label>
+            <label><input type="radio" name="theme" value="dark"> ダーク</label>
+          </div>
+        </fieldset>
+
+        <button class="button button-primary button-block" type="submit">画像を生成する</button>
+      </form>
+
+      <p class="notice">
+        ※ 本ツールはジョーク・パロディ・資料作成などを目的としたものです。実在の人物・団体へのなりすましや、事実と誤認させる目的での利用はお控えください。
+      </p>
+    </section>
+
+    <!-- 生成結果画面 -->
+    <section id="result-screen" class="screen" aria-labelledby="result-heading" hidden>
+      <h2 id="result-heading" class="screen-title">生成結果</h2>
+
+      <div class="preview-wrap">
+        <canvas id="tweet-canvas" class="tweet-canvas" role="img" aria-label="生成したツイート画像"></canvas>
+      </div>
+
+      <div class="result-actions">
+        <button id="download-button" class="button button-primary button-block" type="button">PNG でダウンロード</button>
+        <button id="back-button" class="button button-secondary button-block" type="button">入力画面に戻る</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
