@@ -1,7 +1,11 @@
 # GitHub Pages デプロイワークフロー
 #
-# main ブランチへのプッシュ時に `site/` 配下の静的ファイルを gh-pages ブランチへデプロイします。
+# main ブランチへのプッシュ時に `site/` 配下の静的ファイルを gh-pages ブランチのルートへデプロイします。
 # ビルド工程はなく、`site/` の内容をそのまま公開します。
+# PR プレビュー（`pr-*` ディレクトリ）は保持し、それ以外の古いファイルは削除します。
+#
+# gh-pages への書き込みは `scripts/publish-gh-pages.sh` に集約しており、
+# PR プレビューと同時に push して競合した場合は自動で再試行します。
 #
 # 初回のみ、リポジトリの Settings → Pages で
 # 「Deploy from a branch」→ ブランチ `gh-pages` / フォルダ `/ (root)` を選択してください。
@@ -10,28 +14,40 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/publish-gh-pages.sh"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: pages
+  group: deploy-pages
   cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: GitHub Pages へのデプロイ
-        uses: peaceiris/actions-gh-pages@v4
+        uses: actions/checkout@v7
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
-          # PR プレビュー（pr-*）を消さないよう既存ファイルを保持する
-          keep_files: true
-          exclude_assets: 'pr-*'
+          persist-credentials: false
+      - name: サイトの検証
+        run: node scripts/check-site.mjs site
+      - name: gh-pages へのデプロイ
+        run: |
+          scripts/publish-gh-pages.sh deploy site . "deploy: ${GITHUB_SHA}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 公開 URL の出力
+        run: |
+          owner="${GITHUB_REPOSITORY%%/*}"
+          repo="${GITHUB_REPOSITORY#*/}"
+          echo "公開 URL: https://${owner,,}.github.io/${repo}/" >> "$GITHUB_STEP_SUMMARY"
