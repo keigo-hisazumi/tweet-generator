@@ -4,10 +4,8 @@
 # PR コメントにプレビュー URL と QR コードを自動投稿します。
 # PR クローズ時はプレビューディレクトリを自動削除します。
 #
-# 実プロジェクトに合わせて以下を確認してください:
-#   - ベースパスの環境変数名（VITE_BASE_PATH など）
-#   - ビルドコマンド（npm run build など）
-#   - publish_dir（ビルド出力ディレクトリ）
+# ビルド工程はなく、`site/` 配下の静的ファイルをそのまま公開します。
+# （サイト内の参照はすべて相対パスのため、サブディレクトリ配信でも動作します）
 
 name: PR Preview
 
@@ -26,33 +24,17 @@ concurrency:
 
 jobs:
   deploy-preview:
-    # package.json が存在する npm プロジェクトのみ実行
-    if: github.event.action != 'closed' && hashFiles('package.json') != ''
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Node.js のセットアップ
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: 依存関係のインストール
-        run: npm ci
-
-      # TODO: フレームワークに合わせてベースパスの変数名を変更してください
-      - name: PR ブランチ用ベースパスでビルド
-        env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/pr-${{ github.event.number }}/
-        run: npm run build
-
       - name: gh-pages への PR プレビューのデプロイ
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./site
           destination_dir: pr-${{ github.event.number }}
           keep_files: true
 
@@ -103,7 +85,7 @@ jobs:
             }
 
   cleanup-preview:
-    if: github.event.action == 'closed' && hashFiles('package.json') != ''
+    if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
