@@ -1,9 +1,10 @@
-# GitHub Pages デプロイワークフロー（テンプレート）
+# GitHub Pages デプロイワークフロー
 #
-# main ブランチへのプッシュ時に自動デプロイします。
-# 実プロジェクトに合わせて以下を確認してください:
-#   - ビルドコマンド（npm run build など）
-#   - publish_dir（ビルド出力ディレクトリ）
+# main ブランチへのプッシュ時に `site/` 配下の静的ファイルを gh-pages ブランチへデプロイします。
+# ビルド工程はなく、`site/` の内容をそのまま公開します。
+#
+# 初回のみ、リポジトリの Settings → Pages で
+# 「Deploy from a branch」→ ブランチ `gh-pages` / フォルダ `/ (root)` を選択してください。
 
 name: Deploy to GitHub Pages
 
@@ -22,27 +23,15 @@ concurrency:
 
 jobs:
   deploy:
-    if: hashFiles('package.json') != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Node.js のセットアップ
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-      - name: 依存関係のインストール
-        run: npm ci
-      - name: ビルド
-        run: npm run build
-        env:
-          NODE_ENV: production
       - name: GitHub Pages へのデプロイ
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # TODO: ビルド出力ディレクトリを確認してください（例: ./dist, ./build, ./out）
-          publish_dir: ./dist
+          publish_dir: ./site
+          # PR プレビュー（pr-*）を消さないよう既存ファイルを保持する
           keep_files: true
           exclude_assets: 'pr-*'
