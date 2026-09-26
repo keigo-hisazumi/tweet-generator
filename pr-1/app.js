@@ -9,8 +9,10 @@
   'use strict';
 
   // ---- 描画レイアウト定数（CSS ピクセル単位） ----
-  const CANVAS_WIDTH = 598;
-  const PIXEL_RATIO = 2; // 高解像度で書き出すための倍率
+  // スマートフォン（iPhone 標準サイズ）の画面幅に合わせる
+  const CANVAS_WIDTH = 390;
+  // 結果画面では拡大表示するため、スマートフォン同等の 3 倍解像度で描画する
+  const PIXEL_RATIO = 3;
   const PADDING_X = 16;
   const PADDING_TOP = 12;
   const AVATAR_SIZE = 40;
@@ -40,18 +42,23 @@
     },
   };
 
-  // アクション行のアイコン（24x24 グリッドの SVG パス。線で描画する）
-  const ACTION_ICON_PATHS = [
+  // アクション行のアイコン（24x24 グリッドの SVG パス）
+  // fill: true のものは塗りつぶし、それ以外は線で描画する
+  const ACTION_ICONS = [
     // 返信
-    'M4.5 5h15A2.5 2.5 0 0 1 22 7.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-5.5 4v-4h-2A2.5 2.5 0 0 1 2 15.5v-8A2.5 2.5 0 0 1 4.5 5z',
-    // リポスト
-    'M3 7.5 6.5 4 10 7.5M6.5 4v11a2.5 2.5 0 0 0 2.5 2.5h4.5M21 16.5 17.5 20 14 16.5M17.5 20V9a2.5 2.5 0 0 0-2.5-2.5h-4.5',
+    { path: 'M4.5 5h15A2.5 2.5 0 0 1 22 7.5v8a2.5 2.5 0 0 1-2.5 2.5H12l-5.5 4v-4h-2A2.5 2.5 0 0 1 2 15.5v-8A2.5 2.5 0 0 1 4.5 5z' },
+    // リポスト（左上の上向き矢印と右下の下向き矢印を角丸の線でつないだ形）
+    {
+      path: 'M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88z' +
+        'M16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z',
+      fill: true,
+    },
     // いいね
-    'M12 20.5S3.5 15.6 3.5 9.6A4.6 4.6 0 0 1 12 7.2a4.6 4.6 0 0 1 8.5 2.4c0 6-8.5 10.9-8.5 10.9z',
+    { path: 'M12 20.5S3.5 15.6 3.5 9.6A4.6 4.6 0 0 1 12 7.2a4.6 4.6 0 0 1 8.5 2.4c0 6-8.5 10.9-8.5 10.9z' },
     // ブックマーク
-    'M6 3.5h12v17l-6-4.4-6 4.4z',
+    { path: 'M6 3.5h12v17l-6-4.4-6 4.4z' },
     // 共有
-    'M12 3v12.5M7 8l5-5 5 5M4 14.5v4A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5v-4',
+    { path: 'M12 3v12.5M7 8l5-5 5 5M4 14.5v4A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5v-4' },
   ];
 
   // 行頭に来てはいけない文字（簡易的な禁則処理用）
@@ -464,15 +471,21 @@
     ctx.restore();
   }
 
-  function drawIcon(ctx, pathData, x, y, size, color) {
+  function drawIcon(ctx, icon, x, y, size, color) {
     ctx.save();
     ctx.translate(x, y);
     ctx.scale(size / 24, size / 24);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.75;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.stroke(new Path2D(pathData));
+    const path = new Path2D(icon.path);
+    if (icon.fill) {
+      ctx.fillStyle = color;
+      ctx.fill(path);
+    } else {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.75;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke(path);
+    }
     ctx.restore();
   }
 
@@ -552,9 +565,9 @@
 
     // アクションアイコン（左右端を揃えて均等配置）
     const iconY = dividerY + (ACTION_ROW_HEIGHT - ICON_SIZE) / 2;
-    const step = (contentWidth - ICON_SIZE) / (ACTION_ICON_PATHS.length - 1);
-    ACTION_ICON_PATHS.forEach(function (path, index) {
-      drawIcon(ctx, path, PADDING_X + step * index, iconY, ICON_SIZE, theme.sub);
+    const step = (contentWidth - ICON_SIZE) / (ACTION_ICONS.length - 1);
+    ACTION_ICONS.forEach(function (icon, index) {
+      drawIcon(ctx, icon, PADDING_X + step * index, iconY, ICON_SIZE, theme.sub);
     });
   }
 })();
