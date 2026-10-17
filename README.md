@@ -89,7 +89,6 @@ PR を作成すると `.github/workflows/pr-preview.yml` により `https://<ユ
 | `.github/workflows/codeql.yml` | push（main）/ PR / 毎週 | JavaScript とワークフロー定義のセキュリティスキャン |
 | `.github/workflows/actionlint.yml` | ワークフロー変更時 | ワークフロー自体の Lint |
 | `.github/workflows/release-drafter.yml` | push（main） | PR タイトルのプレフィックスからリリースノート草案を自動生成 |
-| `.github/workflows/copilot-setup-steps.yml` | 手動 / 本ファイル変更時 | Copilot Coding Agent のビルド環境（Node.js・日本語フォント） |
 
 - `.github/dependabot.yml` — GitHub Actions の週次自動更新（1 つの PR にまとめる）
 - `.github/release-drafter.yml` — リリースノートの分類・バージョン決定ルール
