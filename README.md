@@ -22,7 +22,7 @@
 
 ## ディレクトリ構成
 
-```
+```text
 site/
 ├── index.html  # 入力画面・生成結果画面（1 ページ内で切り替え）
 ├── style.css   # スタイル
@@ -68,18 +68,21 @@ PR を作成すると `.github/workflows/pr-preview.yml` により `https://<ユ
 ## 含まれるもの
 
 ### AI 向け指示書
+
 - `AGENTS.md` — **正本**（汎用 AI エージェント向け）
 - `CLAUDE.md` — Claude Code 向け（`AGENTS.md` を参照）
 - `.cursor/rules/project.mdc` — Cursor 向け（`AGENTS.md` を参照）
 - `.github/copilot-instructions.md` — GitHub Copilot 向け（`AGENTS.md` を参照）
 
 ### Issue / PR
+
 - `.github/ISSUE_TEMPLATE/` — バグ報告 / 機能要望 / 質問テンプレート
 - `.github/PULL_REQUEST_TEMPLATE.md` — PR テンプレート（日本語）
 - `.github/CODEOWNERS` — レビュー自動アサイン
 - `CONTRIBUTING.md` / `SECURITY.md` — 貢献ガイドとセキュリティポリシー
 
 ### CI/CD
+
 | ワークフロー | 実行タイミング | 内容 |
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | push（main）/ PR | `site/` の検証（参照ファイルの存在・JavaScript の構文）とシェルスクリプトの shellcheck |
@@ -94,12 +97,14 @@ PR を作成すると `.github/workflows/pr-preview.yml` により `https://<ユ
 - `.github/release-drafter.yml` — リリースノートの分類・バージョン決定ルール
 
 ### 環境差異の吸収
+
 - `.editorconfig` — エディタ間のインデント／改行統一
 - `.gitattributes` — テキスト/バイナリ・改行コードの正規化
 - `.gitignore` — OS / 言語 / ビルド成果物
 - `.vscode/extensions.json`, `.vscode/settings.json` — VSCode 推奨拡張・設定
 
 ### その他
+
 - `LICENSE` — MIT
 
 ## リポジトリの初期設定（手動）
